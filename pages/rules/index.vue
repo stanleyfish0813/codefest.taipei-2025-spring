@@ -4,7 +4,8 @@ const { tm } = useI18n();
 /** 規則概要 - 內容 */
 const prospectusContents = computed(() => {
   const data = tm('rules.prospectus.contents');
-  return Array.isArray(data) ? data : Object.values(data); // 轉換 Object 為 Array
+  if (!data) return [];
+  return Array.isArray(data) ? data : Object.values(data); // 轉換 Object 為 Array，並防範空值
 });
 </script>
 
