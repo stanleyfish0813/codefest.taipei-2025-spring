@@ -9,6 +9,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
 // import required modules
 import { FreeMode, Navigation, Thumbs } from 'swiper/modules';
+import { ref, watch, computed } from 'vue'; // 引入 computed
 const runtimeConfig = useRuntimeConfig();
 
 const props = defineProps<{
@@ -21,12 +22,12 @@ const emit = defineEmits(['close']);
 const thumbsSwiper = ref<Swiper | null>(null);
 
 const setThumbsSwiper = (swiper: Swiper) => {
-  try {
-    thumbsSwiper.value = swiper;
-  } catch (error) {
-    console.error('Error initializing thumbs swiper:', error);
-  }
+  // 移除不必要的 try-catch 區塊，直接賦值給 ref 通常不會拋出錯誤
+  thumbsSwiper.value = swiper;
 };
+
+// 抽取判斷是否有多於一張圖片的邏輯到 computed property
+const hasMultipleImages = computed(() => (props.activeWinningTeam?.image_list?.length ?? 0) > 1);
 
 // Reset swiper state when dialog closes
 watch(
@@ -71,7 +72,7 @@ watch(
               </div>
 
               <!-- 多圖模式 -->
-              <div v-else-if="props.activeWinningTeam?.image_list?.length" class="lg:mb-0 mb-6">
+              <div v-else class="lg:mb-0 mb-6">
                 <div class="relative">
                   <Swiper
                     :space-between="10"
@@ -98,7 +99,7 @@ watch(
                   </Swiper>
                   <!-- 自訂左按鈕 -->
                   <button
-                    v-if="props.activeWinningTeam?.image_list?.length > 1"
+                    v-if="hasMultipleImages"
                     class="team-swiper-button-prev custom-nav-btn"
                   >
                     <img
@@ -110,7 +111,7 @@ watch(
                   </button>
                   <!-- 自訂右按鈕 -->
                   <button
-                    v-if="props.activeWinningTeam?.image_list?.length > 1"
+                    v-if="hasMultipleImages"
                     class="team-swiper-button-next custom-nav-btn"
                   >
                     <img
@@ -122,7 +123,7 @@ watch(
                   </button>
                 </div>
                 <Swiper
-                  v-if="props.activeWinningTeam?.image_list?.length > 1"
+                  v-if="hasMultipleImages"
                   :space-between="10"
                   :slides-per-view="'auto'"
                   :free-mode="true"

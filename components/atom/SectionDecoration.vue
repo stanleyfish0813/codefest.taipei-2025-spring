@@ -1,43 +1,39 @@
-ts
 <script setup lang="ts">
 import { computed, defineProps, onMounted, onUnmounted, ref, withDefaults } from 'vue';
 
 const props = withDefaults(
-  defineProps<{
-    direction?: 'left' | 'right';
+  defineProps<{ 
+    direction?: 'left' | 'right'; 
   }>(),
   {
     direction: 'left',
   }
 );
 
-const currentImage = ref(0); // 0 or 1
+// 使用布林值明確表達狀態切換，true 代表第二張圖
+const isSecondImage = ref(false);
 
 const toggleImage = () => {
-  currentImage.value = (currentImage.value + 1) % 2;
+  isSecondImage.value = !isSecondImage.value;
 };
 
 let intervalId: ReturnType<typeof setInterval>;
 
 onMounted(() => {
-  intervalId = setInterval(toggleImage, 1000); // 每秒切換一次
+  intervalId = setInterval(toggleImage, 1000);
 });
 
 onUnmounted(() => {
   clearInterval(intervalId);
 });
 
-const desktopImageSrc = computed(() => {
-  return currentImage.value === 0
-    ? 'images/section-decoration.svg'
-    : 'images/section-decoration-2.svg';
-});
+const desktopImageSrc = computed(() => 
+  isSecondImage.value ? 'images/section-decoration-2.svg' : 'images/section-decoration.svg'
+);
 
-const mobileImageSrc = computed(() => {
-  return currentImage.value === 0
-    ? 'images/section-decoration-mobile.svg'
-    : 'images/section-decoration-mobile-2.svg';
-});
+const mobileImageSrc = computed(() => 
+  isSecondImage.value ? 'images/section-decoration-mobile-2.svg' : 'images/section-decoration-mobile.svg'
+);
 </script>
 
 <template>
@@ -45,14 +41,12 @@ const mobileImageSrc = computed(() => {
     class="p-4 overflow-hidden flex"
     :class="props.direction === 'right' ? 'justify-end' : 'justify-start'"
   >
-    <!-- desktop -->
     <img
       :src="desktopImageSrc"
       class="lg:block hidden w-[750px]"
       :class="props.direction === 'right' ? 'transform scale-x-[-1]' : ''"
       alt=""
     />
-    <!-- mobile -->
     <img
       :src="mobileImageSrc"
       class="lg:hidden block"

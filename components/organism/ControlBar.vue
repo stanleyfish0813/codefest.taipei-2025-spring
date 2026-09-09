@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ROUTE_PATHS } from '~/constants/routes';
+import { DIALOG_NAMES } from '~/constants/dialogs'; // 新增：引入對話框名稱常數
 import { useDialogStore } from '~/stores/dialogStore';
 const { tm } = useI18n();
 
@@ -14,8 +15,20 @@ const route = useRoute();
 // 只有在競賽規則頁時顯示報名按鈕
 const showApplyBtn = computed(() => route.path.startsWith(ROUTE_PATHS.RULES));
 
+// 計算報名截止日期
+const deadlineDate = computed(() => new Date(tm('schedule.apply_count_down')));
+
+// 判斷報名是否已截止
 const isRegistrationClosed = computed(() => {
-  const deadline = new Date(tm('schedule.apply_count_down'));
+  const deadlineString = tm('schedule.apply_count_down');
+  const deadline = new Date(deadlineString);
+
+  // 如果從 i18n 取得的日期字串無效，則視為未設定截止日 (即尚未截止)，並發出警告
+  if (isNaN(deadline.getTime())) {
+    console.warn(`Invalid deadline date string from i18n: "${deadlineString}". Assuming registration is not closed.`);
+    return false;
+  }
+
   return new Date() > deadline;
 });
 </script>
@@ -47,8 +60,8 @@ const isRegistrationClosed = computed(() => {
       :icon-type="isRegistrationClosed ? null : 'arrow'"
       :disabled="isRegistrationClosed"
       class="w-auto min-w-60 mx-auto btn-lg-span"
-      @click="dialogStore.openDialog('apply')"
-      @keydown.enter.prevent="dialogStore.openDialog('apply')"
+      @click="dialogStore.openDialog(DIALOG_NAMES.APPLY)" // 變更：使用常數
+      @keydown.enter.prevent="dialogStore.openDialog(DIALOG_NAMES.APPLY)" // 變更：使用常數
     >
       {{ isRegistrationClosed ? '報名截止' : '立即報名' }}
     </AtomButton> -->

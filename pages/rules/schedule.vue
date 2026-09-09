@@ -16,13 +16,13 @@ const scheduleList = computed(() => {
   <div>
     <Disclosure
       v-for="(tab, index) in scheduleList"
-      :key="index"
+      :key="tab.id"
       v-slot="{ open }"
       :default-open="index === 2"
     >
       <DisclosureButton
         v-kb-focus="{
-          id: `rules-disclosure-2-${index + 30}`,
+          id: `rules-disclosure-2-${tab.id}`,
           x: 2,
           y: index + 30,
         }"
@@ -103,3 +103,4 @@ const scheduleList = computed(() => {
     </Disclosure>
   </div>
 </template>
+```

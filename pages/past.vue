@@ -1,35 +1,44 @@
 <script setup lang="ts">
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
 import type { PastPhoto, PastVideo, PastWinningTeam } from '~/interfaces/past.interface';
+import { DIALOG_NAMES } from '~/constants/dialogs';
 
 const { tm } = useI18n();
 const dialogStore = useDialogStore();
 const { activeDialog } = storeToRefs(dialogStore);
 const runtimeConfig = useRuntimeConfig();
 
+/**
+ * 從 i18n 獲取列表數據，並將可能為 Object 的數據轉換為 Array
+ * @param path i18n 路徑
+ * @returns 轉換後的列表 Array
+ */
+function getI18nList<T>(path: string): T[] {
+  const data = tm(path);
+  // 由於 tm(path) 返回值可能是 Record<string, T> 或 T[]，這裡進行類型斷言以符合 T[]
+  return Array.isArray(data) ? (data as T[]) : (Object.values(data) as T[]);
+}
+
 /** 獲獎團隊 */
-const winningTeamList = computed<PastWinningTeam[]>(() => {
-  const data = tm('past.winning_teams.list');
-  return Array.isArray(data) ? data : Object.values(data); // 轉換 Object 為 Array
-});
+const winningTeamList = computed<PastWinningTeam[]>(() =>
+  getI18nList<PastWinningTeam>('past.winning_teams.list')
+);
 
 /** 選中的獲獎團隊 */
 const activeWinningTeam = ref<PastWinningTeam | null>(null);
 
 /** 照片回顧 */
-const photoList = computed<PastPhoto[]>(() => {
-  const data = tm('past.photos.list');
-  return Array.isArray(data) ? data : Object.values(data); // 轉換 Object 為 Array
-});
+const photoList = computed<PastPhoto[]>(() =>
+  getI18nList<PastPhoto>('past.photos.list')
+);
 
 /** 選中的照片回顧 */
 const activePhoto = ref<PastPhoto | null>(null);
 
 /** 影音回顧 */
-const videoList = computed<PastVideo[]>(() => {
-  const data = tm('past.videos.list');
-  return Array.isArray(data) ? data : Object.values(data); // 轉換 Object 為 Array
-});
+const videoList = computed<PastVideo[]>(() =>
+  getI18nList<PastVideo>('past.videos.list')
+);
 </script>
 
 <template>
@@ -80,10 +89,10 @@ const videoList = computed<PastVideo[]>(() => {
                   >
                     <div :key="group.id">
                       <a
-                        href="javascript:void(0)"
-                        @click="
+                        href="#"
+                        @click.prevent="
                           activeWinningTeam = group;
-                          dialogStore.openDialog('winningTeam');
+                          dialogStore.openDialog(DIALOG_NAMES.WINNING_TEAM);
                         "
                       >
                         <div class="video-box relative">
@@ -109,6 +118,18 @@ const videoList = computed<PastVideo[]>(() => {
                         </div>
                       </a>
                     </div>
+                  </div>
+                </div>
+                <!-- 無資料時 -->
+                <div v-if="winningTeamList.length === 0" class="flex-1 flex justify-center items-center">
+                  <div>
+                    <img
+                      src="@/assets/images/icons/white-coming-soon.svg"
+                      alt="no-data"
+                      width="60"
+                      class="m-auto"
+                    />
+                    <p class="text-white text-center font-px437 mt-8">Coming Soon......</p>
                   </div>
                 </div>
               </div>
@@ -173,10 +194,10 @@ const videoList = computed<PastVideo[]>(() => {
                   >
                     <div :key="group.id">
                       <a
-                        href="javascript:void(0)"
-                        @click="
+                        href="#"
+                        @click.prevent="
                           activePhoto = group;
-                          dialogStore.openDialog('photo');
+                          dialogStore.openDialog(DIALOG_NAMES.PHOTO);
                         "
                       >
                         <div class="video-box relative">
@@ -201,6 +222,18 @@ const videoList = computed<PastVideo[]>(() => {
                         </div>
                       </a>
                     </div>
+                  </div>
+                </div>
+                <!-- 無資料時 -->
+                <div v-if="photoList.length === 0" class="flex-1 flex justify-center items-center">
+                  <div>
+                    <img
+                      src="@/assets/images/icons/white-coming-soon.svg"
+                      alt="no-data"
+                      width="60"
+                      class="m-auto"
+                    />
+                    <p class="text-white text-center font-px437 mt-8">Coming Soon......</p>
                   </div>
                 </div>
               </div>
@@ -337,7 +370,7 @@ const videoList = computed<PastVideo[]>(() => {
     </section>
 
     <OrganismWinningTeamDialog
-      :is-open="activeDialog === 'winningTeam'"
+      :is-open="activeDialog === DIALOG_NAMES.WINNING_TEAM"
       :active-winning-team="activeWinningTeam"
       @close="
         activeWinningTeam = null;
@@ -345,7 +378,7 @@ const videoList = computed<PastVideo[]>(() => {
       "
     />
     <OrganismPhotoDialog
-      :is-open="activeDialog === 'photo'"
+      :is-open="activeDialog === DIALOG_NAMES.PHOTO"
       :active-photo="activePhoto"
       @close="
         activePhoto = null;

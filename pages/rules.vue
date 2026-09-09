@@ -1,4 +1,3 @@
-ts
 <script setup lang="ts">
 import { ROUTE_PATHS } from '~/constants/routes';
 
@@ -44,13 +43,13 @@ const tabItems = ref<HTMLElement[]>([]);
 const SCROLL_THRESHOLD_INDEX = 2;
 
 const scrollToTab = (index: number) => {
-  const scrollContainer = document.querySelector('.scroll-container'); // 取得 `overflow-x-auto` 的 div
+  const scrollContainer = document.querySelector('.scroll-container') as HTMLElement | null;
 
   if (scrollContainer) {
-    const scrollLeft =
-      index >= SCROLL_THRESHOLD_INDEX
-        ? scrollContainer.scrollWidth - scrollContainer.clientWidth // 滾動到底部
-        : 0; // 回到最左
+    const isEndIndex = index >= SCROLL_THRESHOLD_INDEX;
+    const scrollLeft = isEndIndex 
+      ? scrollContainer.scrollWidth - scrollContainer.clientWidth 
+      : 0;
 
     scrollContainer.scrollTo({
       left: scrollLeft,
@@ -73,14 +72,7 @@ onMounted(() => {
           <p class="section-title font-fusion-pixel">
             {{ activeTab.name }}
           </p>
-          <!-- <div
-            class="lg:flex block justify-center items-center font-fusion-pixel text-white lg:p-10 px-2 py-6 text-center border border-b-white"
-          >
-            <p class="mb-4 lg:mb-0">競賽倒數</p>
-            <MoleculeCountDown :target-date="new Date(tm('schedule.count_down'))" />
-          </div> -->
           <div class="mt-8 lg:flex block">
-            <!-- desktop 左側 Tabs -->
             <div class="lg:block hidden p-4 border-t border-r border-white">
               <div class="flex">
                 <div class="relative flex flex-col">
@@ -106,7 +98,6 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-            <!-- Mobile 上方 Tabs -->
             <div
               class="scroll-container lg:hidden border-b border-white py-4 px-12 overflow-x-auto"
             >
@@ -130,8 +121,6 @@ onMounted(() => {
                 <div class="w-2 h-2 shrink-0"></div>
               </nav>
             </div>
-
-            <!-- 右側內容區 -->
             <div class="flex-1 border-t border-white">
               <div class="flex-1 text-white">
                 <div class="w-full overflow-auto">

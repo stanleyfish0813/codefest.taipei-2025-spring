@@ -11,6 +11,7 @@ import type { PastVideo, PastWinningTeam } from '~/interfaces/past.interface';
 import type { Sponsor } from '~/interfaces/sponsor.interface';
 import { useDialogStore } from '~/stores/dialogStore';
 import { ROUTE_PATHS } from '~/constants/routes';
+import { DIALOG_NAMES } from '~/constants/dialogs';
 
 const dialogStore = useDialogStore();
 const { activeDialog } = storeToRefs(dialogStore);
@@ -131,10 +132,13 @@ const sponsorList = computed<Sponsor[]>(() => {
 });
 
 const duplicatedSponsorList = computed(() => {
-  // 重複 4 次內容以確保無縫循環
+  // 重複 2 次內容以確保無縫循環（動畫移動 -50% 剛好一份距離）
   const originalList = sponsorList.value;
-  return [...originalList, ...originalList, ...originalList, ...originalList];
+  return [...originalList, ...originalList];
 });
+
+// 每張圖固定 8 秒，圖片數量等比縮放，確保速度一致
+const marqueeAnimationDuration = computed(() => `${8 * sponsorList.value.length}s`);
 
 // 存放距離
 const tabToContentDistance = ref(0);
@@ -274,8 +278,8 @@ const newsKeyword = ref('');
                 class="min-w-60"
                 :icon-type="isRegistrationClosed ? null : 'arrow'"
                 :disabled="isRegistrationClosed"
-                @click="dialogStore.openDialog('apply')"
-                @keydown.enter.prevent="dialogStore.openDialog('apply')"
+                @click="dialogStore.openDialog(DIALOG_NAMES.APPLY)"
+                @keydown.enter.prevent="dialogStore.openDialog(DIALOG_NAMES.APPLY)"
               >
                 {{ isRegistrationClosed ? '報名截止' : '立即報名' }}
               </AtomButton>
@@ -320,11 +324,11 @@ const newsKeyword = ref('');
                           x: index + 1,
                           y: 31,
                         }"
-                        href="javascript:void(0)"
+                        href="#"
                         class="m-1 inline-block"
-                        @click="
+                        @click.prevent="
                           activeWinningTeam = group;
-                          dialogStore.openDialog('winningTeam');
+                          dialogStore.openDialog(DIALOG_NAMES.WINNING_TEAM);
                         "
                       >
                         <div class="video-box relative">
@@ -361,10 +365,10 @@ const newsKeyword = ref('');
                   class="mb-8"
                 >
                   <a
-                    href="javascript:void(0)"
-                    @click="
+                    href="#"
+                    @click.prevent="
                       activeWinningTeam = group;
-                      dialogStore.openDialog('winningTeam');
+                      dialogStore.openDialog(DIALOG_NAMES.WINNING_TEAM);
                     "
                   >
                     <div class="video-box relative">
@@ -573,8 +577,8 @@ const newsKeyword = ref('');
                   :icon-type="isRegistrationClosed ? null : 'arrow'"
                   :disabled="isRegistrationClosed"
                   class="w-1/2 lg:w-auto lg:min-w-60"
-                  @click="dialogStore.openDialog('apply')"
-                  @keydown.enter.prevent="dialogStore.openDialog('apply')"
+                  @click="dialogStore.openDialog(DIALOG_NAMES.APPLY)"
+                  @keydown.enter.prevent="dialogStore.openDialog(DIALOG_NAMES.APPLY)"
                 >
                   {{ isRegistrationClosed ? '報名截止' : '立即報名' }}
                 </AtomButton> -->
@@ -986,16 +990,16 @@ const newsKeyword = ref('');
                         x: 1,
                         y: 21 + index,
                       }"
-                      href="javascript:void(0)"
+                      href="#"
                       class="block border border-white p-4 transition hover:bg-primary-50 hover:text-primary-500 m-1"
-                      @click="
+                      @click.prevent="
                         activeNews = news;
-                        dialogStore.openDialog('news');
+                        dialogStore.openDialog(DIALOG_NAMES.NEWS);
                         showPopup(news);
                       "
                       @keydown.enter.prevent="
                         activeNews = news;
-                        dialogStore.openDialog('news');
+                        dialogStore.openDialog(DIALOG_NAMES.NEWS);
                         showPopup(news);
                       "
                     >
@@ -1061,7 +1065,7 @@ const newsKeyword = ref('');
                 <!-- Desktop 輪播 -->
                 <div class="hidden lg:block">
                   <div class="marquee-container">
-                    <div class="marquee-content marquee-left flex">
+                    <div class="marquee-content marquee-left flex" :style="{ animationDuration: marqueeAnimationDuration }">
                       <!-- 重複多次內容以實現無縫循環 -->
                       <div
                         v-for="(sponsor, index) in duplicatedSponsorList"
@@ -1084,7 +1088,7 @@ const newsKeyword = ref('');
                 <div class="lg:hidden block">
                   <!-- 第一排：往右移動 -->
                   <div class="marquee-container mb-4">
-                    <div class="marquee-content marquee-right flex">
+                    <div class="marquee-content marquee-right flex" :style="{ animationDuration: marqueeAnimationDuration }">
                       <!-- 重複多次內容以實現無縫循環 -->
                       <div
                         v-for="(sponsor, index) in duplicatedSponsorList"
@@ -1104,7 +1108,7 @@ const newsKeyword = ref('');
 
                   <!-- 第二排：往左移動 -->
                   <div class="marquee-container">
-                    <div class="marquee-content marquee-left flex">
+                    <div class="marquee-content marquee-left flex" :style="{ animationDuration: marqueeAnimationDuration }">
                       <!-- 重複多次內容以實現無縫循環 -->
                       <div
                         v-for="(sponsor, index) in duplicatedSponsorList"
@@ -1129,7 +1133,7 @@ const newsKeyword = ref('');
       </section>
     </template>
     <OrganismNewsDialog
-      :is-open="activeDialog === 'news'"
+      :is-open="activeDialog === DIALOG_NAMES.NEWS"
       :active-news="activeNews"
       @close="
         activeNews = null;
@@ -1137,7 +1141,7 @@ const newsKeyword = ref('');
       "
     />
     <OrganismWinningTeamDialog
-      :is-open="activeDialog === 'winningTeam'"
+      :is-open="activeDialog === DIALOG_NAMES.WINNING_TEAM"
       :active-winning-team="activeWinningTeam"
       @close="
         activeWinningTeam = null;
@@ -1288,7 +1292,7 @@ const newsKeyword = ref('');
   position: relative;
 
   @media (max-width: 1024px) {
-    height: 80px; /* Mobile 單排高度，因為有兩排 */
+    height: auto; /* Mobile 高度自適應圖片 */
   }
 
   .marquee-content {
@@ -1300,6 +1304,10 @@ const newsKeyword = ref('');
       max-width: none; /* 移除寬度限制 */
       height: 100%; /* 讓圖片填滿容器高度 */
       object-fit: contain; /* 保持比例 */
+
+      @media (max-width: 1024px) {
+        height: auto; /* Mobile 改用 Tailwind class 的固定高度 */
+      }
     }
   }
 
@@ -1343,6 +1351,7 @@ const newsKeyword = ref('');
   align-items: center;
   justify-content: center;
   height: 100%;
+  min-width: 100vw;
 }
 
 .swiper-judge-slide {

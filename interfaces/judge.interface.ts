@@ -1,3 +1,6 @@
+/**
+ * 評審列表或評審分組
+ */
 export interface JudgeList {
   name: string;
   list: Judge[];
